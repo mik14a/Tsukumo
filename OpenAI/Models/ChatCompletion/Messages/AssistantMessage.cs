@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
-namespace OpenAI.Models.ChatCompletion.Messages
+namespace Tsukumo.OpenAI.Models.ChatCompletion.Messages
 {
     public class AssistantMessage : Message
     {

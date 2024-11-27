@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
+    <RootNamespace>Tsukumo.StableDiffusion</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-namespace OpenAI.Models.Completion
+namespace Tsukumo.OpenAI.Models.Completion
 {
     /// <summary>
     /// Usage statistics for the completion request.

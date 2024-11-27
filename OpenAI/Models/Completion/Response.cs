@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace OpenAI.Models.Completion
+namespace Tsukumo.OpenAI.Models.Completion
 {
     /// <summary>
     /// The completion object

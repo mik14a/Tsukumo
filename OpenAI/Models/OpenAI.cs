@@ -1,4 +1,4 @@
-namespace OpenAI.Models
+namespace Tsukumo.OpenAI.Models
 {
     /// <summary>
     /// This class contains the models and their respective token and request limits.

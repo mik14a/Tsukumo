@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace OpenAI.Models.ChatCompletion
+namespace Tsukumo.OpenAI.Models.ChatCompletion
 {
     public class ToolFunction
     {

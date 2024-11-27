@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenAI.Models.Completion;
+using Tsukumo.OpenAI.Models.Completion;
 
-namespace OpenAI.Interfaces
+namespace Tsukumo.OpenAI.Interfaces
 {
     /// <summary>
     /// 完成処理を提供するインターフェースです。

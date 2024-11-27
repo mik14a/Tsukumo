@@ -1,4 +1,4 @@
-﻿namespace OpenAI.Models.ChatCompletion.Messages
+﻿namespace Tsukumo.OpenAI.Models.ChatCompletion.Messages
 {
     public class UserMessage : Message
     {

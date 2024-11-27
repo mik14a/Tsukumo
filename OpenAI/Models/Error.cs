@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace OpenAI.Models
+namespace Tsukumo.OpenAI.Models
 {
     /// <summary>
     /// Represents an error that can occur during a chat completion.

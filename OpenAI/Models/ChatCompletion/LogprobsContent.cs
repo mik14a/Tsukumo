@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
-namespace OpenAI.Models.ChatCompletion
+namespace Tsukumo.OpenAI.Models.ChatCompletion
 {
     /// <summary>
     /// Represents a token with associated log probability information.

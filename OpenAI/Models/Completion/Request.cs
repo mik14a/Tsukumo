@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace OpenAI.Models.Completion
+namespace Tsukumo.OpenAI.Models.Completion
 {
     /// <summary>
     /// Completions

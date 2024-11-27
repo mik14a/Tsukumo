@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using StableDiffusion.Models;
+using Tsukumo.StableDiffusion.Models;
 
-namespace StableDiffusion.Interfaces
+namespace Tsukumo.StableDiffusion.Interfaces
 {
     public interface ITxt2ImgService
     {

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenAI.Models.ChatCompletion;
+using Tsukumo.OpenAI.Models.ChatCompletion;
 
-namespace OpenAI.Interfaces
+namespace Tsukumo.OpenAI.Interfaces
 {
     public interface IChatCompletionService
     {

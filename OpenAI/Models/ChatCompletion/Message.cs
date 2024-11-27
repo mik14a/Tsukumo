@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
-using OpenAI.Models.ChatCompletion.Messages;
+using Tsukumo.OpenAI.Models.ChatCompletion.Messages;
 
-namespace OpenAI.Models.ChatCompletion
+namespace Tsukumo.OpenAI.Models.ChatCompletion
 {
     public class Message
     {

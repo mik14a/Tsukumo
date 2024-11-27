@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace StableDiffusion.Models
+namespace Tsukumo.StableDiffusion.Models
 {
     public class TextToImageResponse
     {

@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace StableDiffusion.Models
+namespace Tsukumo.StableDiffusion.Models
 {
     public class StableDiffusionProcessingTxt2Img
     {

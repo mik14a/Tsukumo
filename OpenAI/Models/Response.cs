@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace OpenAI.Models
+namespace Tsukumo.OpenAI.Models
 {
     public class Response
     {

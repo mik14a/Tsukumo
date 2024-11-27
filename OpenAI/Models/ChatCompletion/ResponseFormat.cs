@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace OpenAI.Models.ChatCompletion
+namespace Tsukumo.OpenAI.Models.ChatCompletion
 {
     /// <summary>
     /// Important: when using JSON mode,
