@@ -9,7 +9,7 @@ namespace Tsukumo.OpenAI.Models.ChatCompletion
     /// based on the provided input.
     /// </summary>
     /// <remarks>https://platform.openai.com/docs/api-reference/chat/object</remarks>
-    public class Response : Models.Response
+    public class Response : Tsukumo.OpenAI.Models.Response
     {
         /// <summary>
         /// A unique identifier for the chat completion.

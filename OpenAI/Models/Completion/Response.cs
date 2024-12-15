@@ -8,7 +8,7 @@ namespace Tsukumo.OpenAI.Models.Completion
     /// Note: both the streamed and non-streamed response objects share the same shape (unlike the chat endpoint).
     /// </summary>
     /// <remarks>https://platform.openai.com/docs/api-reference/completions/object</remarks>
-    public class Response : Models.Response
+    public class Response : Tsukumo.OpenAI.Models.Response
     {
         /// <summary>
         /// The model used for completion.
