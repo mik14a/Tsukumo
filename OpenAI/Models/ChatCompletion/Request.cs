@@ -143,6 +143,13 @@ namespace Tsukumo.OpenAI.Models.ChatCompletion
         public bool? Stream { get; set; }
 
         /// <summary>
+        /// Options for streaming response. Only set this when you set stream: true.
+        /// </summary>
+        /// <value>Optional. Defaults to null.</value>
+        [JsonProperty("stream_options", NullValueHandling = NullValueHandling.Ignore)]
+        public StreamOptions StreamOptions { get; set; }
+
+        /// <summary>
         /// A list of tools the model may call. Currently, only functions are supported as a tool. Use this to provide a list of functions the model may generate JSON inputs for.
         /// </summary>
         /// <value>Optional.</value>
@@ -155,7 +162,7 @@ namespace Tsukumo.OpenAI.Models.ChatCompletion
         /// <remarks>none is the default when no functions are present. auto is the default if functions are present.</remarks>
         /// <value>Optional.</value>
         [JsonProperty("tool_choice", NullValueHandling = NullValueHandling.Ignore)]
-        public string /*ToolChoice*/ ToolChoice { get; set; }
+        public ToolChoice ToolChoice { get; set; }
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
