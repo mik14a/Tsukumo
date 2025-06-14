@@ -6,28 +6,28 @@ using Tsukumo.OpenAI.Models.Completion;
 namespace Tsukumo.OpenAI.Interfaces
 {
     /// <summary>
-    /// 完成処理を提供するインターフェースです。
+    /// Defines the interface for OpenAI completion service operations.
     /// </summary>
     public interface ICompletionService
     {
         /// <summary>
-        /// 指定されたリクエストに基づいて、非同期に完成処理を生成し、結果を返します。
+        /// Creates a completion with the specified request and model ID.
         /// </summary>
-        /// <param name="request">完成リクエストの詳細。</param>
-        /// <param name="modelId">使用するモデルのID（オプション）。</param>
-        /// <param name="cancellationToken">処理のキャンセルを監視するためのトークン。</param>
-        /// <returns>非同期操作を表すタスクオブジェクト。</returns>
+        /// <param name="request">The completion request containing the prompt and parameters.</param>
+        /// <param name="modelId">The ID of the model to use for completion (optional).</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous completion operation.</returns>
         Task<Response> CreateCompletion(Request request,
                                         string modelId = null,
                                         CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 指定されたリクエストに基づいて、非同期に完成処理をストリームとして生成し、結果を返します。
+        /// Creates a streaming completion with the specified request and model ID.
         /// </summary>
-        /// <param name="request">完成リクエストの詳細。</param>
-        /// <param name="modelId">使用するモデルのID（オプション）。</param>
-        /// <param name="cancellationToken">処理のキャンセルを監視するためのトークン。</param>
-        /// <returns>レスポンスオブジェクトの非同期列挙可能なシーケンス。</returns>
+        /// <param name="request">The completion request containing the prompt and parameters.</param>
+        /// <param name="modelId">The ID of the model to use for completion (optional).</param>
+        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
+        /// <returns>An async enumerable that yields completion responses as they become available.</returns>
         IAsyncEnumerable<Response> CreateCompletionAsStream(Request request,
                                                             string modelId = null,
                                                             CancellationToken cancellationToken = default);
