@@ -15,14 +15,14 @@ public class VoiceVoxService : IVoiceVoxService
         _endpoint = endpoint;
     }
 
-    public async Task<Stream> Speak(string text, int speaker, float speedScale, CancellationToken cancellationToken) {
+    public async Task<Stream> Speak(string text, string speaker, float speedScale, CancellationToken cancellationToken) {
         using var httpClient = new HttpClient();
         var query = await AudioQuery(httpClient, text, speaker, cancellationToken);
         return query != null ? await Synthesis(httpClient, query, speaker, speedScale, cancellationToken)
                              : Stream.Null;
     }
 
-    async Task<string?> AudioQuery(HttpClient httpClient, string text, int speaker, CancellationToken cancellationToken) {
+    async Task<string?> AudioQuery(HttpClient httpClient, string text, string speaker, CancellationToken cancellationToken) {
         using var request = new HttpRequestMessage(HttpMethod.Post, $"{_endpoint}/audio_query?text={text}&speaker={speaker}");
         request.Headers.TryAddWithoutValidation("accept", "application/json");
         request.Content = new StringContent(string.Empty);
@@ -36,7 +36,7 @@ public class VoiceVoxService : IVoiceVoxService
         return null;
     }
 
-    async Task<Stream> Synthesis(HttpClient httpClient, string query, int speaker, float speedScale, CancellationToken cancellationToken) {
+    async Task<Stream> Synthesis(HttpClient httpClient, string query, string speaker, float speedScale, CancellationToken cancellationToken) {
         var json = JObject.Parse(query);
         json["speedScale"] = speedScale;
         using var request = new HttpRequestMessage(HttpMethod.Post, $"{_endpoint}/synthesis?speaker={speaker}&enable_interrogative_upspeak=true");

@@ -17,6 +17,6 @@ namespace Tsukumo.VoiceVox.Interfaces
         /// <param name="speedScale">The speed scale factor for speech playback (1.0 is normal speed).</param>
         /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous speech synthesis operation.</returns>
-        Task<Stream> Speak(string text, int speaker, float speedScale, CancellationToken cancellationToken);
+        Task<Stream> Speak(string text, string speaker, float speedScale, CancellationToken cancellationToken);
     }
 }
