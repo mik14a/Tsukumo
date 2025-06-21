@@ -44,11 +44,19 @@ namespace Tsukumo.OpenAI.Models.Completion
         public float? PresencePenalty { get; set; }
 
         /// <summary>
-        /// Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
+        /// Sets how strongly to penalize repetitions. A higher value (e.g., 1.5) will penalize repetitions more strongly,
+        /// while a lower value (e.g., 0.9) will be more lenient. (Default: 1.1)
         /// </summary>
         /// <value>Optional.</value>
         [JsonProperty("repeat_penalty", NullValueHandling = NullValueHandling.Ignore)]
         public float? RepeatPenalty { get; set; }
+
+        /// <summary>
+        /// Sets how far back for the model to look back to prevent repetition. (Default: 64, 0 = disabled, -1 = num_ctx)
+        /// </summary>
+        /// <value>Optional.</value>
+        [JsonProperty("repeat_last_n", NullValueHandling = NullValueHandling.Ignore)]
+        public int? RepeatLastN { get; set; }
 
         /// <summary>
         /// What sampling temperature to use, between 0 and 2.
