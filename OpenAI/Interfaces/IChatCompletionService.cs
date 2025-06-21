@@ -14,7 +14,7 @@ namespace Tsukumo.OpenAI.Interfaces
         /// <summary>
         /// Gets the request URI for the chat completion API endpoint.
         /// </summary>
-        public string RequestUri { get; }
+        string RequestUri { get; }
 
         /// <summary>
         /// Creates a chat completion with the specified request and timeout.

@@ -8,18 +8,24 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Tsukumo.Core;
 using Tsukumo.OpenAI.Interfaces;
 using Tsukumo.OpenAI.Models.ChatCompletion;
 
 namespace Tsukumo.OpenAI.Services;
 
-public class ChatCompletionService : IChatCompletionService
+public class ChatCompletionService : IChatCompletionService, IDisposable
 {
     public string RequestUri => _requestUri;
 
     public ChatCompletionService(string endpoint, string? apiKey) {
         _requestUri = $"{endpoint}/{_api}";
         _apiKey = apiKey;
+        _httpClient = HttpClientFactory.CreateHttpClient();
+        _httpClient.DefaultRequestHeaders.ConnectionClose = false;
+        if (_apiKey != null) {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+        }
     }
 
     public async Task<Response?> CreateChatCompletion(
@@ -28,14 +34,15 @@ public class ChatCompletionService : IChatCompletionService
         CancellationToken cancellationToken = default) {
 
         request.Stream = false;
-        using var client = new HttpClient {
-            Timeout = timeout
-        };
-        if (_apiKey != null) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+        _httpClient.Timeout = timeout;
         var requestJson = JsonConvert.SerializeObject(request);
         var httpContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
-        var httpResponseMessage = await client.PostAsync(_requestUri, httpContent, cancellationToken);
+        var httpResponseMessage = await _httpClient.PostAsync(_requestUri, httpContent, cancellationToken);
+#if NETCOREAPP3_0_OR_GREATER
+        var responseJson = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken);
+#else
         var responseJson = await httpResponseMessage.Content.ReadAsStringAsync();
+#endif
         return JsonConvert.DeserializeObject<Response>(responseJson);
     }
 
@@ -44,16 +51,14 @@ public class ChatCompletionService : IChatCompletionService
         [EnumeratorCancellation] CancellationToken cancellationToken = default) {
 
         request.Stream = true;
-        using var client = new HttpClient();
-        if (_apiKey != null) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-
+        _httpClient.Timeout = _defaultTimeout;
         var requestJson = JsonConvert.SerializeObject(request);
         var httpContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, _requestUri);
         httpRequestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
         httpRequestMessage.Content = httpContent;
 
-        var httpResponseMessage = await client.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         await using var stream = await httpResponseMessage.Content.ReadAsStreamAsync();
         using var reader = new StreamReader(stream);
         while (true) {
@@ -68,8 +73,16 @@ public class ChatCompletionService : IChatCompletionService
         }
     }
 
+    public void Dispose() {
+        _httpClient?.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
     const string _api = "chat/completions";
     const string _data = "data: ", _done = "[DONE]";
     readonly string _requestUri;
     readonly string? _apiKey;
+    readonly HttpClient _httpClient;
+
+    static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(100);
 }
