@@ -59,16 +59,39 @@ public class ChatCompletionService : IChatCompletionService, IDisposable
         httpRequestMessage.Content = httpContent;
 
         var httpResponseMessage = await _httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+#if NET5_0_OR_GREATER
+        await using var stream = await httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken);
+#else
         await using var stream = await httpResponseMessage.Content.ReadAsStreamAsync();
+#endif
         using var reader = new StreamReader(stream);
+        var readed = string.Empty;
         while (true) {
             cancellationToken.ThrowIfCancellationRequested();
+#if NET5_0_OR_GREATER
+            var line = await reader.ReadLineAsync(cancellationToken);
+#else
             var line = await reader.ReadLineAsync();
-            if (line == null) break;
+#endif
+            if (line == null) {
+                if (!string.IsNullOrEmpty(readed)) {
+                    yield return new Response { Error = new Models.Error { Message = readed } };
+                }
+                break;  // End of stream
+            }
             if (string.IsNullOrEmpty(line)) continue;
-            var data = line.StartsWith(_data, StringComparison.Ordinal) ? line[_data.Length..] : line;
+            if (line.StartsWith(':')) continue;  // Skip comments
+
+            readed = readed + line;
+            var data = line.StartsWith(_data, StringComparison.Ordinal) ? readed[_data.Length..] : readed;
             if (data == _done) break;
-            var block = JsonConvert.DeserializeObject<Response>(data);
+            Response? block = null;
+            try {
+                block = JsonConvert.DeserializeObject<Response>(data);
+                readed = string.Empty;  // Reset data for the next iteration
+            } catch {
+                readed = data;  // Keep the current data for the next iteration
+            }
             if (block != null) yield return block;
         }
     }
