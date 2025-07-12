@@ -65,7 +65,7 @@ public class ChatCompletionService : IChatCompletionService, IDisposable
         await using var stream = await httpResponseMessage.Content.ReadAsStreamAsync();
 #endif
         using var reader = new StreamReader(stream);
-        var readed = string.Empty;
+        var buffer = new StringBuilder();
         while (true) {
             cancellationToken.ThrowIfCancellationRequested();
 #if NET5_0_OR_GREATER
@@ -74,23 +74,25 @@ public class ChatCompletionService : IChatCompletionService, IDisposable
             var line = await reader.ReadLineAsync();
 #endif
             if (line == null) {
-                if (!string.IsNullOrEmpty(readed)) {
-                    yield return new Response { Error = new Models.Error { Message = readed } };
+                if (0 < buffer.Length) {
+                    yield return new Response { Error = new Models.Error { Message = buffer.ToString() } };
                 }
                 break;  // End of stream
             }
-            if (string.IsNullOrEmpty(line)) continue;
+            if (line.Length == 0) continue;
             if (line.StartsWith(':')) continue;  // Skip comments
 
-            readed = readed + line;
-            var data = line.StartsWith(_data, StringComparison.Ordinal) ? readed[_data.Length..] : readed;
+            buffer.Append(line);
+            var data = line.StartsWith(_data, StringComparison.Ordinal)
+                ? buffer.ToString(_data.Length, buffer.Length - _data.Length)
+                : buffer.ToString();
             if (data == _done) break;
             Response? block = null;
             try {
                 block = JsonConvert.DeserializeObject<Response>(data);
-                readed = string.Empty;  // Reset data for the next iteration
+                buffer.Clear();  // Reset data for the next iteration
             } catch {
-                readed = data;  // Keep the current data for the next iteration
+                buffer.Clear().Append(data);  // Keep the current data for the next iteration
             }
             if (block != null) yield return block;
         }
