@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <ProjectReference Include="..\Tsukumo.Core\Tsukumo.Core.csproj" />
+    <ProjectReference Include="..\Tsukumo.Net\Tsukumo.Net.csproj" />
     <ProjectReference Include="..\OpenAI\OpenAI.csproj" />
   </ItemGroup>
 

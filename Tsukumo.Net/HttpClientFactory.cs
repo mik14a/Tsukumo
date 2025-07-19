@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 #endif
 
-namespace Tsukumo.Core
+namespace Tsukumo
 {
     public static class HttpClientFactory
     {

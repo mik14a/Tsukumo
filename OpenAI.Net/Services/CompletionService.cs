@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Tsukumo.Core;
 using Tsukumo.OpenAI.Interfaces;
 using Tsukumo.OpenAI.Models.Completion;
 

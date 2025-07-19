@@ -5,7 +5,6 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Tsukumo.Core;
 using Tsukumo.VoiceVox.Interfaces;
 
 namespace Tsukumo.VoiceVox.Services;
