@@ -23,6 +23,9 @@ public class CompletionService : ICompletionService, IDisposable
         if (_apiKey != null) {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
         }
+        _jsonSettings = new JsonSerializerSettings {
+            NullValueHandling = NullValueHandling.Ignore
+        };
     }
 
     public async Task<Response?> CreateCompletion(
@@ -30,7 +33,7 @@ public class CompletionService : ICompletionService, IDisposable
         string? modelId = null,
         CancellationToken cancellationToken = default) {
         request.Stream = false;
-        var requestJson = JsonConvert.SerializeObject(request);
+        var requestJson = JsonConvert.SerializeObject(request, _jsonSettings);
         var httpContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
         var httpResponseMessage = await _httpClient.PostAsync(_requestUri, httpContent, cancellationToken);
 #if NETCOREAPP3_0_OR_GREATER
@@ -38,7 +41,7 @@ public class CompletionService : ICompletionService, IDisposable
 #else
         var responseJson = await httpResponseMessage.Content.ReadAsStringAsync();
 #endif
-        return JsonConvert.DeserializeObject<Response>(responseJson);
+        return JsonConvert.DeserializeObject<Response>(responseJson, _jsonSettings);
     }
 
     public async IAsyncEnumerable<Response?> CreateCompletionAsStream(
@@ -47,7 +50,7 @@ public class CompletionService : ICompletionService, IDisposable
         [EnumeratorCancellation] CancellationToken cancellationToken = default) {
 
         request.Stream = true;
-        var requestJson = JsonConvert.SerializeObject(request);
+        var requestJson = JsonConvert.SerializeObject(request, _jsonSettings);
         var httpContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, _requestUri);
         httpRequestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -84,7 +87,7 @@ public class CompletionService : ICompletionService, IDisposable
             if (data == _done) break;
             Response? block = null;
             try {
-                block = JsonConvert.DeserializeObject<Response>(data);
+                block = JsonConvert.DeserializeObject<Response>(data, _jsonSettings);
                 buffer.Clear();  // Reset data for the next iteration
             } catch {
                 buffer.Clear().Append(data);  // Keep the current data for the next iteration
@@ -102,4 +105,5 @@ public class CompletionService : ICompletionService, IDisposable
     readonly string _requestUri;
     readonly string? _apiKey;
     readonly HttpClient _httpClient;
+    readonly JsonSerializerSettings _jsonSettings;
 }

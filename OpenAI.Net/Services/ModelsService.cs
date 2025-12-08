@@ -19,6 +19,9 @@ public class ModelsService : IModelsService, IDisposable
         if (_apiKey != null) {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
         }
+        _jsonSettings = new JsonSerializerSettings {
+            NullValueHandling = NullValueHandling.Ignore
+        };
     }
 
     public async Task<ListModelsResponse?> ListModels(CancellationToken cancellationToken = default) {
@@ -28,7 +31,7 @@ public class ModelsService : IModelsService, IDisposable
 #else
         var responseJson = await httpResponseMessage.Content.ReadAsStringAsync();
 #endif
-        return JsonConvert.DeserializeObject<ListModelsResponse>(responseJson);
+        return JsonConvert.DeserializeObject<ListModelsResponse>(responseJson, _jsonSettings);
     }
 
     public void Dispose() {
@@ -40,4 +43,5 @@ public class ModelsService : IModelsService, IDisposable
     readonly string _requestUri;
     readonly string? _apiKey;
     readonly HttpClient _httpClient;
+    readonly JsonSerializerSettings _jsonSettings;
 }

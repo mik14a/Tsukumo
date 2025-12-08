@@ -15,11 +15,14 @@ public class Txt2ImgService : ITxt2ImgService, IDisposable
         _requestUri = $"{endpoint}/{_api}";
         _httpClient = HttpClientFactory.CreateHttpClient();
         _httpClient.DefaultRequestHeaders.ConnectionClose = false;
+        _jsonSettings = new JsonSerializerSettings {
+            NullValueHandling = NullValueHandling.Ignore
+        };
     }
 
     public async Task<TextToImageResponse?> GenerateAsync(StableDiffusionProcessingTxt2Img request, CancellationToken cancellationToken = default) {
 
-        var requestJson = JsonConvert.SerializeObject(request);
+        var requestJson = JsonConvert.SerializeObject(request, _jsonSettings);
         using var httpContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
         using var httpResponseMessage = await _httpClient.PostAsync(_requestUri, httpContent, cancellationToken);
 #if NETCOREAPP3_0_OR_GREATER
@@ -27,7 +30,7 @@ public class Txt2ImgService : ITxt2ImgService, IDisposable
 #else
         var responseJson = await httpResponseMessage.Content.ReadAsStringAsync();
 #endif
-        var result = JsonConvert.DeserializeObject<TextToImageResponse>(responseJson);
+        var result = JsonConvert.DeserializeObject<TextToImageResponse>(responseJson, _jsonSettings);
         return result;
     }
 
@@ -39,4 +42,5 @@ public class Txt2ImgService : ITxt2ImgService, IDisposable
     const string _api = "txt2img";
     readonly string _requestUri;
     readonly HttpClient _httpClient;
+    readonly JsonSerializerSettings _jsonSettings;
 }
