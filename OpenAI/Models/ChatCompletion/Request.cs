@@ -92,6 +92,35 @@ namespace Tsukumo.OpenAI.Models.ChatCompletion
         public int? MaxTokens { get; set; }
 
         /// <summary>
+        /// Static class defining the reasoning effort levels for reasoning models.
+        /// </summary>
+        public static class ReasoningEfforts
+        {
+            /// <summary>
+            /// Low reasoning effort. Faster responses, fewer tokens on reasoning.
+            /// </summary>
+            public static string Low = "low";
+            /// <summary>
+            /// Medium reasoning effort (default for reasoning models).
+            /// </summary>
+            public static string Medium = "medium";
+            /// <summary>
+            /// High reasoning effort. More thorough reasoning, higher latency and token usage.
+            /// </summary>
+            public static string High = "high";
+        }
+
+        /// <summary>
+        /// Constrains effort on reasoning for reasoning models. 
+        /// Currently supported values are "low", "medium", and "high". 
+        /// Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning in a response.
+        /// </summary>
+        /// <remarks>https://platform.openai.com/docs/api-reference/chat/create#chat-create-reasoning_effort</remarks>
+        /// <value>Optional.</value>
+        [JsonProperty("reasoning_effort", NullValueHandling = NullValueHandling.Ignore)]
+        public string ReasoningEffort { get; set; }
+
+        /// <summary>
         /// An object specifying the format that the model must output. Compatible with gpt-4-1106-preview and gpt-3.5-turbo-1106.
         /// </summary>
         /// <remarks>
