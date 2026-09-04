@@ -12,11 +12,12 @@ namespace Tsukumo.ComfyUI.Services;
 
 public class PromptService : IPromptService, IDisposable
 {
-    public PromptService(string endpoint, Workflow workflow, string promptNodeId, string negativePromptNodeId) {
+    public PromptService(string endpoint, Workflow workflow, string promptNodeId, string negativePromptNodeId, string negativePrompt) {
         _endpoint = endpoint;
         Workflow = workflow ?? throw new ArgumentNullException(nameof(workflow));
         PromptNodeId = RequireNode(promptNodeId, nameof(promptNodeId));
         NegativePromptNodeId = RequireNode(negativePromptNodeId, nameof(negativePromptNodeId));
+        NegativePrompt = negativePrompt;
         _httpClient = HttpClientFactory.CreateHttpClient();
         _httpClient.DefaultRequestHeaders.ConnectionClose = false;
 
@@ -34,10 +35,11 @@ public class PromptService : IPromptService, IDisposable
     public Workflow Workflow { get; }
     public string PromptNodeId { get; }
     public string NegativePromptNodeId { get; }
+    public string NegativePrompt { get; }
 
-    public async Task<IReadOnlyList<byte[]>> GenerateAsync(string prompt, string negativePrompt, CancellationToken cancellationToken = default) {
+    public async Task<IReadOnlyList<byte[]>> GenerateAsync(string prompt, CancellationToken cancellationToken = default) {
         Workflow.SetInput(PromptNodeId, _textInput, prompt);
-        Workflow.SetInput(NegativePromptNodeId, _textInput, negativePrompt);
+        Workflow.SetInput(NegativePromptNodeId, _textInput, NegativePrompt);
         var promptId = await Queue();
         var images = await Wait();
         var result = new List<byte[]>(images.Count);

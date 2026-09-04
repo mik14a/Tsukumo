@@ -1,14 +1,12 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Tsukumo.ComfyUI.Models;
+using Tsukumo.Interfaces;
 
 namespace Tsukumo.ComfyUI.Interfaces
 {
     /// <summary>
     /// Defines the interface for ComfyUI prompt execution.
     /// </summary>
-    public interface IPromptService
+    public interface IPromptService : ITxt2ImgService
     {
         /// <summary>
         /// The API-format workflow this service executes.
@@ -26,12 +24,8 @@ namespace Tsukumo.ComfyUI.Interfaces
         string NegativePromptNodeId { get; }
 
         /// <summary>
-        /// Writes prompts into the injected nodes, queues the workflow, and returns output images.
+        /// The negative prompt written to <see cref="NegativePromptNodeId"/> on each generation.
         /// </summary>
-        /// <param name="prompt">The positive prompt written to <see cref="PromptNodeId"/>.</param>
-        /// <param name="negativePrompt">The negative prompt written to <see cref="NegativePromptNodeId"/>.</param>
-        /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous image generation operation.</returns>
-        Task<IReadOnlyList<byte[]>> GenerateAsync(string prompt, string negativePrompt, CancellationToken cancellationToken);
+        string NegativePrompt { get; }
     }
 }

@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Tsukumo.StableDiffusion.Models
 {
-    public class StableDiffusionProcessingTxt2Img
+    public class Txt2ImgRequest
     {
         [JsonProperty("prompt")]
         public string Prompt { get; set; }  // Default: ""
