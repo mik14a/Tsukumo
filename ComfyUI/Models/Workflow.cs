@@ -15,12 +15,14 @@ namespace Tsukumo.ComfyUI.Models
 
         public JObject Graph { get; }
 
-        public Workflow SetInput(string nodeId, string inputName, JToken value) {
-            if (Graph[nodeId] is not JObject node)
-                throw new InvalidOperationException($"Node '{nodeId}' not found.");
-            if (node["inputs"] is not JObject inputs)
-                throw new InvalidOperationException($"Node '{nodeId}' has no inputs.");
-            inputs[inputName] = value;
+        public Workflow SetText(string nodeId, JToken text) {
+            SetInput(nodeId, "text", text);
+            return this;
+        }
+
+        public Workflow SetSize(string nodeId, JToken width, JToken height) {
+            SetInput(nodeId, "width", width);
+            SetInput(nodeId, "height", height);
             return this;
         }
 
@@ -33,21 +35,28 @@ namespace Tsukumo.ComfyUI.Models
 
             void Walk(JToken token) {
                 switch (token.Type) {
-                    case JTokenType.Object:
-                        foreach (var child in ((JObject)token).Properties())
-                            Walk(child.Value);
-                        break;
-                    case JTokenType.Array:
-                        foreach (var item in (JArray)token)
-                            Walk(item);
-                        break;
-                    case JTokenType.String:
-                        var text = (string)token;
-                        if (text.Contains(placeholder))
-                            ((JValue)token).Value = text.Replace(placeholder, value);
-                        break;
+                case JTokenType.Object:
+                    foreach (var child in ((JObject)token).Properties())
+                        Walk(child.Value);
+                    break;
+                case JTokenType.Array:
+                    foreach (var item in (JArray)token)
+                        Walk(item);
+                    break;
+                case JTokenType.String:
+                    var text = (string)token;
+                    if (text.Contains(placeholder))
+                        ((JValue)token).Value = text.Replace(placeholder, value);
+                    break;
                 }
             }
+        }
+
+        Workflow SetInput(string nodeId, string inputName, JToken value) {
+            if (Graph[nodeId] is not JObject node) throw new InvalidOperationException($"Node '{nodeId}' not found.");
+            if (node["inputs"] is not JObject inputs) throw new InvalidOperationException($"Node '{nodeId}' has no inputs.");
+            inputs[inputName] = value;
+            return this;
         }
     }
 }

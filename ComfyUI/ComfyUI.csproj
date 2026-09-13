@@ -2,13 +2,12 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
     <RootNamespace>Tsukumo.ComfyUI</RootNamespace>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <ProjectReference Include="..\Tsukumo\Tsukumo.csproj" />
   </ItemGroup>
 
 </Project>

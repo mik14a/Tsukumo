@@ -5,41 +5,49 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Tsukumo.ComfyUI.Interfaces;
 using Tsukumo.ComfyUI.Models;
+using Tsukumo.Interfaces;
 
 namespace Tsukumo.ComfyUI.Services;
 
-public class PromptService : IPromptService, IDisposable
+public class PromptService : ITxt2ImgService, IDisposable
 {
-    public PromptService(string endpoint, Workflow workflow, string promptNodeId, string negativePromptNodeId, string negativePrompt) {
+    public PromptService(string endpoint,
+                         Workflow workflow,
+                         string promptNodeId,
+                         string negativePromptNodeId,
+                         string sizeNodeId,
+                         string negativePrompt) {
         _endpoint = endpoint;
-        Workflow = workflow ?? throw new ArgumentNullException(nameof(workflow));
-        PromptNodeId = RequireNode(promptNodeId, nameof(promptNodeId));
-        NegativePromptNodeId = RequireNode(negativePromptNodeId, nameof(negativePromptNodeId));
-        NegativePrompt = negativePrompt;
+        _workflow = workflow ?? throw new ArgumentNullException(nameof(workflow));
+        _promptNodeId = RequireInputNode(promptNodeId, nameof(promptNodeId));
+        _negativePromptNodeId = !string.IsNullOrEmpty(negativePromptNodeId) ? RequireInputNode(negativePromptNodeId, nameof(negativePromptNodeId)) : string.Empty;
+        _sizeNodeId = RequireSizeNode(sizeNodeId, nameof(sizeNodeId));
+        _negativePrompt = negativePrompt;
         _httpClient = HttpClientFactory.CreateHttpClient();
         _httpClient.DefaultRequestHeaders.ConnectionClose = false;
 
-        string RequireNode(string nodeId, string paramName) {
-            if (string.IsNullOrEmpty(nodeId))
-                throw new ArgumentException("Node id is required.", paramName);
-            if (workflow.Graph[nodeId] is not JObject node)
-                throw new InvalidOperationException($"Node '{nodeId}' not found.");
-            if (node["inputs"] is not JObject)
-                throw new InvalidOperationException($"Node '{nodeId}' has no inputs.");
-            return nodeId;
+        string RequireInputNode(string nodeId, string paramName) {
+            return string.IsNullOrEmpty(nodeId) ? throw new ArgumentException("Node id is required.", paramName)
+                : workflow.Graph[nodeId] is not JObject node ? throw new InvalidOperationException($"Node '{nodeId}' not found.")
+                : node["inputs"] is not JObject ? throw new InvalidOperationException($"Node '{nodeId}' has no inputs.")
+                : nodeId;
+        }
+
+        string RequireSizeNode(string nodeId, string paramName) {
+            return string.IsNullOrEmpty(nodeId) ? throw new ArgumentException("Node id is required.", paramName)
+                : workflow.Graph[nodeId] is not JObject node ? throw new InvalidOperationException($"Node '{nodeId}' not found.")
+                : node["inputs"] is not JObject inputs ? throw new InvalidOperationException($"Node '{nodeId}' has no inputs.")
+                : inputs[_widthInput] == null ? throw new InvalidOperationException($"Node '{nodeId}' has no width input.")
+                : inputs[_heightInput] == null ? throw new InvalidOperationException($"Node '{nodeId}' has no height input.")
+                : nodeId;
         }
     }
 
-    public Workflow Workflow { get; }
-    public string PromptNodeId { get; }
-    public string NegativePromptNodeId { get; }
-    public string NegativePrompt { get; }
-
-    public async Task<IReadOnlyList<byte[]>> GenerateAsync(string prompt, CancellationToken cancellationToken = default) {
-        Workflow.SetInput(PromptNodeId, _textInput, prompt);
-        Workflow.SetInput(NegativePromptNodeId, _textInput, NegativePrompt);
+    public async Task<IReadOnlyList<byte[]>> GenerateAsync(string prompt, int width, int height, CancellationToken cancellationToken = default) {
+        _workflow.SetText(_promptNodeId, prompt);
+        if (!string.IsNullOrEmpty(_negativePromptNodeId)) _workflow.SetText(_negativePromptNodeId, _negativePrompt);
+        _workflow.SetSize(_sizeNodeId, width, height);
         var promptId = await Queue();
         var images = await Wait();
         var result = new List<byte[]>(images.Count);
@@ -48,7 +56,7 @@ public class PromptService : IPromptService, IDisposable
         return result;
 
         async Task<string> Queue() {
-            var body = new JObject { ["prompt"] = Workflow.Graph.DeepClone() };
+            var body = new JObject { ["prompt"] = _workflow.Graph.DeepClone() };
             using var httpContent = new StringContent(body.ToString(), Encoding.UTF8, "application/json");
             using var httpResponseMessage = await _httpClient.PostAsync($"{_endpoint}/prompt", httpContent, cancellationToken);
             var responseJson = await ReadString(httpResponseMessage);
@@ -58,9 +66,7 @@ public class PromptService : IPromptService, IDisposable
             if (response["node_errors"] is JObject nodeErrors && nodeErrors.Count > 0)
                 throw new InvalidOperationException($"ComfyUI node errors: {nodeErrors}");
             var id = (string?)response["prompt_id"];
-            if (string.IsNullOrEmpty(id))
-                throw new InvalidOperationException($"ComfyUI returned no prompt_id: {responseJson}");
-            return id;
+            return string.IsNullOrEmpty(id) ? throw new InvalidOperationException($"ComfyUI returned no prompt_id: {responseJson}") : id;
         }
 
         async Task<List<ImageRef>> Wait() {
@@ -95,11 +101,9 @@ public class PromptService : IPromptService, IDisposable
             if (entry["status"] is not JObject status)
                 return true;
             var statusStr = (string?)status["status_str"];
-            if (string.Equals(statusStr, "error", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException($"ComfyUI execution failed for {promptId}: {status["messages"]}");
-            if (status["completed"] is JToken completed)
-                return completed.Value<bool>();
-            return true;
+            return string.Equals(statusStr, "error", StringComparison.OrdinalIgnoreCase)
+                ? throw new InvalidOperationException($"ComfyUI execution failed for {promptId}: {status["messages"]}")
+                : status["completed"] is not JToken completed || completed.Value<bool>();
         }
 
         List<ImageRef> ReadImages(JObject entry) {
@@ -122,13 +126,13 @@ public class PromptService : IPromptService, IDisposable
             return images;
         }
 
-        async Task<string> ReadString(HttpResponseMessage httpResponseMessage) {
+        async Task<string> ReadString(HttpResponseMessage httpResponseMessage) =>
 #if NETCOREAPP3_0_OR_GREATER
-            return await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken);
+            await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken);
 #else
-            return await httpResponseMessage.Content.ReadAsStringAsync();
+            await httpResponseMessage.Content.ReadAsStringAsync();
 #endif
-        }
+
     }
 
     public void Dispose() {
@@ -136,9 +140,15 @@ public class PromptService : IPromptService, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    const string _textInput = "text";
+    const string _widthInput = "width";
+    const string _heightInput = "height";
     const int _pollIntervalMs = 500;
     readonly string _endpoint;
+    readonly Workflow _workflow;
+    readonly string _promptNodeId;
+    readonly string _negativePromptNodeId;
+    readonly string _sizeNodeId;
+    readonly string _negativePrompt;
     readonly HttpClient _httpClient;
 
     readonly struct ImageRef

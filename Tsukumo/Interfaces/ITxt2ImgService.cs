@@ -13,8 +13,10 @@ namespace Tsukumo.Interfaces
         /// Generates images from a text prompt.
         /// </summary>
         /// <param name="prompt">The text prompt used for image generation.</param>
+        /// <param name="width">The width of the generated image.</param>
+        /// <param name="height">The height of the generated image.</param>
         /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous image generation operation.</returns>
-        Task<IReadOnlyList<byte[]>> GenerateAsync(string prompt, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<byte[]>> GenerateAsync(string prompt, int width, int height, CancellationToken cancellationToken = default);
     }
 }

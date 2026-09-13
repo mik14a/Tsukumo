@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <ProjectReference Include="..\Tsukumo.Net\Tsukumo.Net.csproj" />
+    <ProjectReference Include="..\Tsukumo\Tsukumo.csproj" />
     <ProjectReference Include="..\ComfyUI\ComfyUI.csproj" />
   </ItemGroup>
 
