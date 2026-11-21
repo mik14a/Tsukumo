@@ -20,11 +20,9 @@ namespace Tsukumo.OpenAI.Interfaces
         /// Creates a chat completion with the specified request and timeout.
         /// </summary>
         /// <param name="request">The chat completion request containing messages and parameters.</param>
-        /// <param name="timeout">The timeout duration for the request.</param>
         /// <param name="cancellationToken">A token that can be used to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous chat completion operation.</returns>
         Task<Response> CreateChatCompletion(Request request,
-                                            TimeSpan timeout,
                                             CancellationToken cancellationToken = default);
 
         /// <summary>

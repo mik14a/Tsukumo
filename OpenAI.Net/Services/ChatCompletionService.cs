@@ -17,11 +17,12 @@ public class ChatCompletionService : IChatCompletionService, IDisposable
 {
     public string RequestUri => _requestUri;
 
-    public ChatCompletionService(string endpoint, string? apiKey) {
+    public ChatCompletionService(string endpoint, TimeSpan timeout, string? apiKey) {
         _requestUri = $"{endpoint}/{_api}";
         _apiKey = apiKey;
         _httpClient = HttpClientFactory.CreateHttpClient();
         _httpClient.DefaultRequestHeaders.ConnectionClose = false;
+        _httpClient.Timeout = timeout;
         if (_apiKey != null) {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
         }
@@ -32,11 +33,9 @@ public class ChatCompletionService : IChatCompletionService, IDisposable
 
     public async Task<Response?> CreateChatCompletion(
         Request request,
-        TimeSpan timeout,
         CancellationToken cancellationToken = default) {
 
         request.Stream = false;
-        _httpClient.Timeout = timeout;
         var requestJson = JsonConvert.SerializeObject(request, _jsonSettings);
         var httpContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
         var httpResponseMessage = await _httpClient.PostAsync(_requestUri, httpContent, cancellationToken);
@@ -53,7 +52,6 @@ public class ChatCompletionService : IChatCompletionService, IDisposable
         [EnumeratorCancellation] CancellationToken cancellationToken = default) {
 
         request.Stream = true;
-        _httpClient.Timeout = _defaultTimeout;
         var requestJson = JsonConvert.SerializeObject(request, _jsonSettings);
         var httpContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, _requestUri);
@@ -111,6 +109,4 @@ public class ChatCompletionService : IChatCompletionService, IDisposable
     readonly string? _apiKey;
     readonly HttpClient _httpClient;
     readonly JsonSerializerSettings _jsonSettings;
-
-    static readonly TimeSpan _defaultTimeout = TimeSpan.FromSeconds(100);
 }
